@@ -44,9 +44,10 @@ app.get('/convert', async (req, res) => {
         const document = await pdf(pdfBuffer, { scale: 3 });
         const imageLinks = [];
         for await (const image of document) {
-            const imagePath = `${outputDirectory}/image-${counter}-${randomString()}.jpg`;
+            const imgPath = `/image-${counter}-${randomString()}.jpg`;
+            const imagePath = `${outputDirectory}${imgPath}`;
             fs.writeFileSync(imagePath, image);
-            imageLinks.push(`/images/image-${counter}.jpg`);
+            imageLinks.push(`/images/${imgPath}`);
             counter++;
         }
 

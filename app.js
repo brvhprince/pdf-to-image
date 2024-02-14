@@ -29,14 +29,14 @@ app.get('/convert', async (req, res) => {
     try {
 
         const fileName = getFileName(url);
-
+        const outputDirectory = './public/images';
         // check if file slides already exists
         const checkDirectory = `./public/images/${fileName}-slide-1.jpg`;
         if (fs.existsSync(checkDirectory)) {
             const imageLinks = [];
             for (let i = 1; i <= 100; i++) {
                 const imgPath = `${fileName}-slide-${i}.jpg`;
-                const imagePath = `${checkDirectory}/${imgPath}`;
+                const imagePath = `${outputDirectory}/${imgPath}`;
                 if (fs.existsSync(imagePath)) {
                     imageLinks.push(`/images/${imgPath}`);
                 } else {
@@ -54,7 +54,6 @@ app.get('/convert', async (req, res) => {
 
         const pdfBuffer = await response.buffer();
 
-        const outputDirectory = './public/images';
 
         // Deleting the output folder if it exists
         rimraf.sync(outputDirectory);

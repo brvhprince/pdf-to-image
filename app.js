@@ -18,13 +18,35 @@ app.use(express.json());
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-const randomString = () => Math.random().toString(36).substring(7);
+// const randomString = () => Math.random().toString(36).substring(7);
+
+const getFileName = url => url.split('/').pop();
 
 // Route to convert PDF to images and return image links
 app.get('/convert', async (req, res) => {
     const { url } = req.query;
 
     try {
+
+        const fileName = getFileName(url);
+
+        // check if file slides already exists
+        const checkDirectory = `./public/images/${fileName}-slide-1.jpg`;
+        if (fs.existsSync(checkDirectory)) {
+            const imageLinks = [];
+            for (let i = 1; i <= 100; i++) {
+                const imgPath = `${fileName}-slide-${i}.jpg`;
+                const imagePath = `${checkDirectory}/${imgPath}`;
+                if (fs.existsSync(imagePath)) {
+                    imageLinks.push(`/images/${imgPath}`);
+                } else {
+                    break;
+                }
+            }
+            res.json(imageLinks);
+            return;
+        }
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to download PDF (${response.status} ${response.statusText})`);
@@ -44,8 +66,8 @@ app.get('/convert', async (req, res) => {
         const document = await pdf(pdfBuffer, { scale: 3 });
         const imageLinks = [];
         for await (const image of document) {
-            const imgPath = `/image-${counter}-${randomString()}.jpg`;
-            const imagePath = `${outputDirectory}${imgPath}`;
+            const imgPath = `${fileName}-slide-${counter}.jpg`;
+            const imagePath = `${outputDirectory}/${imgPath}`;
             fs.writeFileSync(imagePath, image);
             imageLinks.push(`/images/${imgPath}`);
             counter++;
